@@ -2,8 +2,8 @@ U = {}
 
 local universal_comp_weight = {
     ["nil"] = 0,
-    boolean = 1,
-    number = 2,
+    number = 1,
+    boolean = 2,
     string = 3,
     table = 4,
 }
@@ -82,9 +82,14 @@ function string.escape (str)
     local new = str
     :gsub("\\", "\\\\")
     :gsub("\n", "\\n")
+    :gsub("\r", "\\r")
     :gsub("\t", "\\t")
     :gsub("\"", "\\\"")
     return '"'.. new ..'"'
+end
+
+function string.valid_key (str)
+    return str:match("^[_%a][_%a%d]*$") ~= nil
 end
 
 local function indent (str, depth)
@@ -107,12 +112,29 @@ local function splat (tab, depth)
     end
     local lines = {"{"}
     table.sort(keys, U.universal_comp)
-    for _, key in ipairs(keys) do
+    local is_array_index = true
+    for i, key in ipairs(keys) do
         local value = tab[key]
         local t_key = type(key)
         --TODO: this may be an unreasonable constraint, re-evaluate
         assert(splat_supported_key_types[t_key],
             ("`%s` is not a supported key type for `splat`"):format(t_key))
+
+        local prefix
+        if is_array_index and i == key then
+            prefix = ""
+        else
+            is_array_index = false
+            if type(key) == "string" then
+                if key:valid_key() then
+                    prefix = key .." = "
+                else
+                    prefix = ("[%s] = "):format(key:escape())
+                end
+            else
+                prefix = ("[%s] = "):format(tostring(key))
+            end
+        end
 
         local t_value = type(value)
         local str_value
@@ -123,7 +145,7 @@ local function splat (tab, depth)
         else
             str_value = tostring(value)
         end
-        local line = indent(tostring(key) .." = ".. str_value ..",", depth + 1)
+        local line = indent(prefix .. str_value ..",", depth + 1)
         lines[#lines+1] = line
     end
     lines[#lines+1] = indent("}", depth)
