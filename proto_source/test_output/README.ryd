@@ -1,0 +1,4 @@
+This directory stores the actually results of the unit tests.
+While the directory is in the [m|.gitignore], this file should be kept to ensure
+this test result directory always exists.
+
