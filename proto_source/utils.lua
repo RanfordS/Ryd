@@ -102,6 +102,9 @@ local splat_supported_key_types = {
 ---@return string
 local function splat (tab, depth)
     local keys = table.list_keys(tab)
+    if #keys == 0 then
+        return "{}"
+    end
     local lines = {"{"}
     table.sort(keys, U.universal_comp)
     for _, key in ipairs(keys) do
