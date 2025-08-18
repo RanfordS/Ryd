@@ -92,6 +92,8 @@ function string.escape (str)
 end
 
 local keywords = {
+    ["and"]      = true,
+    ["break"]    = true,
     ["do"]       = true,
     ["else"]     = true,
     ["elseif"]   = true,
@@ -100,15 +102,13 @@ local keywords = {
     ["function"] = true,
     ["in"]       = true,
     ["local"]    = true,
+    ["not"]      = true,
+    ["or"]       = true,
+    ["repeat"]   = true,
     ["return"]   = true,
     ["then"]     = true,
-    ["while"]    = true,
-    ["repeat"]   = true,
     ["until"]    = true,
-    ["break"]    = true,
-    ["and"]      = true,
-    ["or"]       = true,
-    ["not"]      = true,
+    ["while"]    = true,
 
     ["true"]     = true,
     ["false"]    = true,
