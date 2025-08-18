@@ -78,6 +78,9 @@ function table.contains (tab, item)
     return table.key_of(tab, item) ~= nil
 end
 
+---Escapes control characters and quotes.
+---@param str string String to apply escapes to.
+---@return string
 function string.escape (str)
     local new = str
     :gsub("\\", "\\\\")
@@ -88,7 +91,35 @@ function string.escape (str)
     return '"'.. new ..'"'
 end
 
+local keywords = {
+    ["do"]       = true,
+    ["else"]     = true,
+    ["elseif"]   = true,
+    ["end"]      = true,
+    ["for"]      = true,
+    ["function"] = true,
+    ["in"]       = true,
+    ["local"]    = true,
+    ["return"]   = true,
+    ["then"]     = true,
+    ["while"]    = true,
+    ["repeat"]   = true,
+    ["until"]    = true,
+    ["break"]    = true,
+    ["and"]      = true,
+    ["or"]       = true,
+    ["not"]      = true,
+
+    ["true"]     = true,
+    ["false"]    = true,
+    ["nil"]      = true,
+}
+
+---Checks to see if a string could be used as a key without being escaped.
 function string.valid_key (str)
+    if keywords[str] then
+        return false
+    end
     return str:match("^[_%a][_%a%d]*$") ~= nil
 end
 
@@ -102,8 +133,9 @@ local splat_supported_key_types = {
     boolean = true,
 }
 
----@param tab table
----@param depth integer
+---Outputs a given table and it's children as a string.
+---@param tab table Table to output.
+---@param depth integer Indentation depth for displaying at.
 ---@return string
 local function splat (tab, depth)
     local keys = table.list_keys(tab)
@@ -152,7 +184,9 @@ local function splat (tab, depth)
     return table.concat(lines, "\n")
 end
 
-
+---Outputs a given table and it's children as a string.
+---@param tab table Table to output.
+---@return string
 function table.splat (tab)
     return splat(tab, 0)
 end
