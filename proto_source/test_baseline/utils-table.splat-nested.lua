@@ -1,4 +1,4 @@
-{
+return {
     [10] = "index 10",
     [false] = true,
     [true] = false,

@@ -18,8 +18,8 @@ function Test_Result (test_name, actual)
     assert(test_results[test_name] == nil,
         ("Multiple test have the name `%s`"):format(test_name))
 
-    local output_path   = ("./test_output/%s.txt")  :format(test_name)
-    local baseline_path = ("./test_baseline/%s.txt"):format(test_name)
+    local output_path   = ("./test_output/%s")  :format(test_name)
+    local baseline_path = ("./test_baseline/%s"):format(test_name)
     local result = false
 
     local output_file = io.open(output_path, "wb")

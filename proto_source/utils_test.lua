@@ -1,19 +1,19 @@
 require "test_framework"
 require "utils"
 
-Test_Result("utils-table.splat-empty",
-    table.splat({}) .."\n")
+Test_Result("utils-table.splat-empty.lua",
+    "return ".. table.splat({}) .."\n")
 
-Test_Result("utils-table.splat-just_string_keys",
-    table.splat({
+Test_Result("utils-table.splat-just_string_keys.lua",
+    "return ".. table.splat({
         foo = 1,
         bar = "Hello\tWorld",
         baz = true,
     }) .."\n"
 )
 
-Test_Result("utils-table.splat-nested",
-    table.splat({
+Test_Result("utils-table.splat-nested.lua",
+    "return ".. table.splat({
         fib = {0, 1, 1, 2, 3, 5, 8},
         nested = {
             first_name = "John",
