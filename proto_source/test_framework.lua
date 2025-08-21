@@ -22,7 +22,7 @@ function Test_Result (test_name, actual)
     local baseline_path = ("./test_baseline/%s"):format(test_name)
     local result = false
 
-    local output_file = io.open(output_path, "wb")
+    local output_file = io.open(output_path, "w")
     if output_file then
         output_file:write(actual)
         output_file:close()
@@ -30,7 +30,7 @@ function Test_Result (test_name, actual)
         print(test_name ..": Could not open file for writing test result")
     end
 
-    local baseline_file = io.open(baseline_path, "rb")
+    local baseline_file = io.open(baseline_path, "r")
     if baseline_file then
         local expected = baseline_file:read("*all")
         result = actual == expected
