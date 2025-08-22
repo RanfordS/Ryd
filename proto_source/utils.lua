@@ -133,16 +133,37 @@ local splat_supported_key_types = {
     boolean = true,
 }
 
+---Gets the custom metatable name for the given table.
+---@param tab table Table to get meta name of.
+---@return string? metaname Metatable name as a string, nil if none is defined.
+local function get_metaname (tab)
+    local m = getmetatable(tab)
+    if m and m._metaname then
+        return m._metaname
+    end
+    return nil
+end
+
 ---Outputs a given table and it's children as a string.
+---Warning: do not use on cyclic tables (e.g., a={}, a.foo=a).
 ---@param tab table Table to output.
 ---@param depth integer Indentation depth for displaying at.
 ---@return string
 local function splat (tab, depth)
+    local metaname = get_metaname(tab)
+    local open = "{"
+    local shut = "}"
+    if metaname then
+        open = ("Meta(\"%s\", {"):format(metaname)
+        shut = "})"
+    end
+
     local keys = table.list_keys(tab)
     if #keys == 0 then
-        return "{}"
+        return open .. shut
     end
-    local lines = {"{"}
+
+    local lines = {open}
     table.sort(keys, U.universal_comp)
     local is_array_index = true
     for i, key in ipairs(keys) do
@@ -180,7 +201,7 @@ local function splat (tab, depth)
         local line = indent(prefix .. str_value ..",", depth + 1)
         lines[#lines+1] = line
     end
-    lines[#lines+1] = indent("}", depth)
+    lines[#lines+1] = indent(shut, depth)
     return table.concat(lines, "\n")
 end
 
@@ -189,5 +210,38 @@ end
 ---@return string
 function table.splat (tab)
     return splat(tab, 0)
+end
+
+---Performs a shallow clone of the given table.
+---@generic A
+---@param tab A
+---@return A
+function table.shallow_clone (tab)
+    local new = {}
+    for k, v in pairs(tab) do
+        new[k] = v
+    end
+    return setmetatable(new, getmetatable(tab))
+end
+
+---Performs a deep clone of the given table.
+---Warning: do not use on cyclic tables (e.g., a={}, a.foo=a).
+---Note: does not preserve repeated tables (e.g., a={}, b={foo=a, bar=a}
+---will become c={foo=d, bar=e}).
+---@generic A
+---@param tab A
+---@return A
+function table.deep_clone (tab)
+    local new = {}
+    for k, v in pairs(tab) do
+        if type(k) == "table" then
+            k = table.deep_clone(k)
+        end
+        if type(v) == "table" then
+            v = table.deep_clone(v)
+        end
+        new[k] = v
+    end
+    return setmetatable(new, getmetatable(tab))
 end
 

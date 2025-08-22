@@ -39,8 +39,7 @@ print("")
 print(">> Complete Test")
 local tokenized = R.tokenize(complete_input)
 local complete_result = table.splat(tokenized)
---print(complete_result)
-print(R.token_list_to_string(complete_input, tokenized, 0))
+print(complete_result)
 Test_Result("ryd.tokenizer-large_complete_sample.lua",
     "return ".. complete_result)
 

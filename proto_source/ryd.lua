@@ -6,11 +6,12 @@ local Ryd = {}
 ---@alias Token Text | Command | Group | Separator
 
 ---@class Text
----@field token_type "text"
+---@field _metaname "Token.Text"
 ---@field start_pos integer Byte offset of the token within the file.
 ---@field end_pos integer Byte offset of the token within the file.
 local Text = {}
-Text.token_type = "text"
+Text.__index = Text
+Text._metaname = "Token.Text"
 
 function Text.new (start_position, end_position)
     return setmetatable({
@@ -20,14 +21,14 @@ function Text.new (start_position, end_position)
 end
 
 ---@class Command
----@field token_type "command"
+---@field _metaname "Token.Command"
 ---@field start_pos integer Byte offset of the token within the file.
 ---@field end_pos integer Byte offset of the token within the file.
 ---@field name string Identifier part of the command
 ---@field content Token[]
 local Command = {}
 Command.__index = Command
-Command.token_type = "command"
+Command._metaname = "Token.Command"
 
 function Command.new (position)
     return setmetatable({
@@ -39,13 +40,13 @@ function Command.new (position)
 end
 
 ---@class Group
----@field token_type "group"
+---@field _metaname "Token.Group"
 ---@field start_pos integer Byte offset of the token within the file.
 ---@field end_pos integer Byte offset of the token within the file.
 ---@field content Token[]
 local Group = {}
 Group.__index = Group
-Group.token_type = "group"
+Group._metaname = "Token.Group"
 
 ---@param position integer
 ---@return Group
@@ -58,11 +59,11 @@ function Group.new (position)
 end
 
 ---@class Separator
----@field token_type "separator"
+---@field _metaname "Token.Separator"
 ---@field pos integer Byte offset of the token within the file.
 local Separator = {}
 Separator.__index = Separator
-Separator.token_type = "separator"
+Separator._metaname = "Token.Separator"
 
 ---@param position integer
 ---@return Separator
@@ -76,25 +77,11 @@ end
 
 ---@enum Token_Type
 local Token_Type = {
-    command   = Command,
-    group     = Group,
-    text      = Text,
-    separator = Separator,
+    ["Token.Command"]   = Command,
+    ["Token.Group"]     = Group,
+    ["Token.Text"]      = Text,
+    ["Token.Separator"] = Separator,
 }
-
-
-
----@param source string
----@return Token[]
-function Ryd.parse_by_char (source)
-    ---@type Token[]
-    local result = {}
-
-    for char in source:gmatch(".") do
-    end
-
-    return result
-end
 
 
 
@@ -112,9 +99,9 @@ function Ryd.tokenize (source)
             return result
         end
         local top = stack[#stack]
-        if top.token_type == "command" then
+        if top._metaname == "Token.Command" then
             return top.content
-        elseif top.token_type == "group" then
+        elseif top._metaname == "Token.Group" then
             return top.content
         end
         error("idk")
@@ -157,7 +144,7 @@ function Ryd.tokenize (source)
             stack[#stack+1] = cmd
 
         elseif char == Special_Chars.close_command then
-            if #stack == 0 or stack[#stack].token_type ~= "command" then
+            if #stack == 0 or stack[#stack]._metaname ~= "Token.Command" then
                 pos_error(
                     "Close command unmatched")
             end
@@ -173,14 +160,14 @@ function Ryd.tokenize (source)
             if #stack == 0 then
                 result[#result+1] = sep
             else
-                if     top.token_type == "command" then
+                if     top._metaname == "Token.Command" then
                     -- TODO: handle intermediate text
                     table.insert(top.content, sep)
-                elseif top.token_type == "group"   then
+                elseif top._metaname == "Token.Group"   then
                     -- TODO: handle intermediate text
                     table.insert(top.content, sep)
                 else
-                    pos_error("Separator not valid within ".. top.token_type)
+                    pos_error("Separator not valid within ".. top._metaname)
                 end
             end
             if in_command_name then
@@ -196,7 +183,7 @@ function Ryd.tokenize (source)
 
         elseif char == Special_Chars.close_group then
             if not in_command_name then
-                if #stack == 0 or stack[#stack].token_type ~= "group" then
+                if #stack == 0 or stack[#stack]._metaname ~= "Token.Group" then
                     pos_error(
                         "Close group unmatched")
                 end
@@ -211,6 +198,8 @@ function Ryd.tokenize (source)
         last = pos
     end
 
+    assert(#stack == 0, "Reached end of input with groups/commands still open")
+
     return result
 end
 
@@ -222,15 +211,18 @@ function Ryd.token_list_to_string (source, tokens, indent)
     local result = {}
     local prefix = ("  "):rep(indent)
     for _, token in ipairs(tokens) do
-        local t = token.token_type
-        if t == "text" then
+        local t = token._metaname
+        if t == "Token.Text" then
             local text = source:sub(token.start_pos, token.end_pos)
             table.insert(result, prefix .. text:escape())
-        elseif t == "separator" then
+        elseif t == "Token.Separator" then
             table.insert(result, prefix .. "|")
-        elseif t == "command" then
+        elseif t == "Token.Command" then
             local args = Ryd.token_list_to_string(source, token.content, indent + 1)
-            table.insert(result, prefix .. token.name .."\n".. args)
+            table.insert(result, prefix .."[".. token.name .."]\n".. args)
+        elseif t == "Token.Group" then
+            local args = Ryd.token_list_to_string(source, token.content, indent + 1)
+            table.insert(result, prefix .. "{}\n".. args)
         end
     end
     return table.concat(result, "\n")
