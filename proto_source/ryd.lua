@@ -198,34 +198,16 @@ function Ryd.tokenize (source)
         last = pos
     end
 
-    assert(#stack == 0, "Reached end of input with groups/commands still open")
+    assert(#stack == 0,
+        "Reached end of input with groups/commands still open")
+    assert(not in_command_name,
+        "Reached end of input while expecting a command name")
+
+    if last+1 < #source then
+        table.insert(context(), Text.new(last+1, #source))
+    end
 
     return result
-end
-
----@param source string
----@param tokens Token[]
----@param indent integer
----@return string
-function Ryd.token_list_to_string (source, tokens, indent)
-    local result = {}
-    local prefix = ("  "):rep(indent)
-    for _, token in ipairs(tokens) do
-        local t = token._metaname
-        if t == "Token.Text" then
-            local text = source:sub(token.start_pos, token.end_pos)
-            table.insert(result, prefix .. text:escape())
-        elseif t == "Token.Separator" then
-            table.insert(result, prefix .. "|")
-        elseif t == "Token.Command" then
-            local args = Ryd.token_list_to_string(source, token.content, indent + 1)
-            table.insert(result, prefix .."[".. token.name .."]\n".. args)
-        elseif t == "Token.Group" then
-            local args = Ryd.token_list_to_string(source, token.content, indent + 1)
-            table.insert(result, prefix .. "{}\n".. args)
-        end
-    end
-    return table.concat(result, "\n")
 end
 
 return Ryd

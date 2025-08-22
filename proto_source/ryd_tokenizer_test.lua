@@ -35,11 +35,28 @@ The following commands can be used to include the special characters literally.
 | [}]       | [m|[l][}][r]] | Right curly brace. |[nr]
 ]
 ]=]
-print("")
-print(">> Complete Test")
 local tokenized = R.tokenize(complete_input)
 local complete_result = table.splat(tokenized)
-print(complete_result)
 Test_Result("ryd.tokenizer-large_complete_sample.lua",
     "return ".. complete_result)
+
+local failure_cases = {
+    incomplete_command = "[",
+    incomplete_command_args = "[foo|bar",
+    incomplete_group = "{",
+    unmatched_command = "]",
+    unmatched_group = "}",
+    mismatched_1 = "[}",
+    mismatched_2 = "[|}",
+    mismatched_3 = "{]",
+    mismatched_4 = "{[foo|}]",
+}
+
+
+
+for test, input in pairs(failure_cases) do
+    Expect_Error("ryd.tokenizer-fail-".. test,
+        R.tokenize, input)
+end
+
 
