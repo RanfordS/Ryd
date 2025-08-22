@@ -1,7 +1,6 @@
 
----@enum Token_Type
-Token_Type = {
-    text = "",
+---@enum Special_Char
+Special_Chars = {
     separator = "|",
     open_group = "{",
     close_group = "}",
