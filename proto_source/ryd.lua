@@ -135,6 +135,12 @@ function Ryd.tokenize (source)
             error(prefix .. message)
         end
 
+        if not in_command_name then
+            if last+1 <= pos-1 then
+                table.insert(context(), Text.new(last+1, pos-1))
+            end
+        end
+
         local top = stack[#stack]
 
         if not table.contains(Special_Chars, char) then
