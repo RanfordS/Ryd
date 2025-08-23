@@ -92,10 +92,22 @@ test("padded_block_strings", [[
 ] now.
 ]], "|", "] now")
 
+test("nothing_special", [[
+[lua|
+    function quadratic (a, b, c)
+        local det = b^2 - 4a*c
+        assert(0 <= det, "no real roots")
+        det = math.sqrt(det)
+        return (-b - det)/(2*a), (-b + det)/(2*a)
+    end
+] over.
+]], "|", "] over")
+
+
+
 local function err (case, input)
     local test_name = "lua_seek-err_".. case
-    local result = seek(input, 1)
-    T.record_result(test_name, result == nil)
+    T.expect_error(test_name, seek, input, 1)
 end
 
 err("missing_end_empty",        "")
