@@ -258,3 +258,22 @@ function table.deep_clone (tab)
     return setmetatable(new, getmetatable(tab))
 end
 
+---Version of pairs that iterates over the keys in a fixed order.
+---Note that this will be significantly slower than pairs, use sparingly.
+---@generic K, V
+---@param tab table<K, V> Table to iterate.
+---@return fun(): K, V
+function table.sorted_pairs (tab)
+    local keys = table.list_keys(tab)
+    table.sort(keys, U.universal_comp)
+    local i = 0
+    return function ()
+        i = i + 1
+        if #keys < i then
+            return nil
+        end
+        local k = keys[i]
+        return k, tab[k]
+    end
+end
+

@@ -40,6 +40,9 @@ local complete_result = table.splat(tokenized)
 Test_Result("ryd.tokenizer-large_complete_sample.lua",
     "return ".. complete_result)
 
+
+
+---@type {[string]: string}
 local failure_cases = {
     incomplete_command = "[",
     incomplete_command_args = "[foo|bar",
@@ -52,9 +55,7 @@ local failure_cases = {
     mismatched_4 = "{[foo|}]",
 }
 
-
-
-for test, input in pairs(failure_cases) do
+for test, input in table.sorted_pairs(failure_cases) do
     Expect_Error("ryd.tokenizer-fail-".. test,
         R.tokenize, input)
 end
