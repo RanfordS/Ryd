@@ -7,7 +7,7 @@ local seek = require "lua_seek"
 ---@param close_pattern string Pattern for the script ending.
 ---This should always start with a close square bracket.
 local function test (case, input, open_pattern, close_pattern)
-    local test_name = "lua-seek-".. case
+    local test_name = "lua_seek-".. case
 
     local _, start_pos = input:find(open_pattern)
     assert(start_pos, test_name ..": starting pattern not found")
@@ -45,5 +45,66 @@ Preamble:
 Done.
 ]=], "|", "]%.\nDone")
 
+test("line_comment", [=[
+[lua|
+    --]] wait for it
+] now.
+]=], "|", "] now")
 
+test("block_comment", [=[
+[lua|
+    --[[
+    ] wait for it
+    ] still no
+    ]]
+] now.
+]=], "|", "] now")
+
+test("padded_block_comment", [=[
+[lua|
+    --[==[
+    ] wait for it
+    ] still no
+    ]==]
+] now.
+]=], "|", "] now")
+
+test("fakeout_block_comments", [=[
+[lua|
+    --[
+    ---[==[
+] now.
+]=], "|", "] now")
+
+test("block_strings", [=[
+[lua|
+    local foo = [[
+        Embedded ] ]==]
+    ]]
+] now.
+]=], "|", "] now")
+
+test("padded_block_strings", [[
+[lua|
+    local foo = [=[
+        Embedded ] ]==]
+    ]=]
+] now.
+]], "|", "] now")
+
+local function err (case, input)
+    local test_name = "lua_seek-err_".. case
+    local result = seek(input, 1)
+    T.record_result(test_name, result == nil)
+end
+
+err("missing_end_empty",        "")
+err("missing_end_content",      "print('hi')")
+err("mismatch",                 "print(args[1])")
+err("open_line_comment",        "--]")
+err("open_block_comment",       "--[[]")
+err("tail_block_comment",       "--[[]]")
+err("open_string",              "a=\"]")
+err("open_block_string",        "a=[[]=]=]")
+err("open_padded_block_string", "a=[=[]]]")
 
