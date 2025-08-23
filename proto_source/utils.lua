@@ -143,6 +143,7 @@ end
 local function indent (str, depth)
     return ("    "):rep(depth) .. str
 end
+string.indent = indent
 
 ---Lookup of Lua types that splat supports as table keys.
 ---@type Set<string>
