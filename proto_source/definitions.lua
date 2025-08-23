@@ -1,4 +1,6 @@
 
+---@alias Set<T> table<T, true>
+
 ---@enum Special_Char
 Special_Chars = {
     separator = "|",

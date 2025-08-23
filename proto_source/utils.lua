@@ -1,7 +1,7 @@
 U = {}
 
 ---Weights for each Lua type used in universal_comp.
----@type {[type]: integer}
+---@type table<type, integer>
 local universal_comp_weight = {
     ["nil"] = 0,
     number = 1,
@@ -36,8 +36,9 @@ end
 
 ---Gets a list of all the keys in a given table.
 ---Note that the order maybe be inconsistent between runs.
----@param tab table
----@return table
+---@generic K, V
+---@param tab table<K, V>
+---@return K[]
 function table.list_keys (tab)
     local keys = {}
     for key, _ in pairs (tab) do
@@ -49,8 +50,9 @@ end
 ---Takes a table and returns another table where all of the input table values
 ---are keys with `true` as the value. Useful when checking for the presence of
 ---many table values.
----@param tab table Table to get values from.
----@return {[any]: true} map Resulting value map.
+---@generic K, V
+---@param tab table<K, V> Table to get values from.
+---@return Set<V> map Resulting value map.
 function table.value_map (tab)
     local map = {}
     for _, v in pairs(tab) do
@@ -63,9 +65,10 @@ end
 ---If the item occurs within the table multiple times then there is no guarantee
 ---which key will be returned.
 ---If the table does not contain the item, `nil` is returned.
----@param tab table Table to search within.
----@param item any Item to search for.
----@return any? key Matching key, or `nil` if the value is not found.
+---@generic K, V
+---@param tab table<K, V> Table to search within.
+---@param item V Item to search for.
+---@return K? key Matching key, or `nil` if the value is not found.
 function table.key_of (tab, item)
     for k, v in pairs(tab) do
         if v == item then
@@ -76,8 +79,9 @@ function table.key_of (tab, item)
 end
 
 ---Returns whether a particular item is in the given table.
----@param tab table Table to search within
----@param item any Item to search for.
+---@generic K, V
+---@param tab table<K, V> Table to search within.
+---@param item V Item to search for.
 ---@return boolean present True when the table contains the item.
 function table.contains (tab, item)
     return table.key_of(tab, item) ~= nil
@@ -97,6 +101,7 @@ function string.escape (str)
 end
 
 ---Lookup of Lua keywords.
+---@type Set<string>
 local keywords = {
     ["and"]      = true,
     ["break"]    = true,
@@ -140,6 +145,7 @@ local function indent (str, depth)
 end
 
 ---Lookup of Lua types that splat supports as table keys.
+---@type Set<string>
 local splat_supported_key_types = {
     number  = true,
     string  = true,
