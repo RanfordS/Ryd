@@ -1,6 +1,7 @@
 T = require "test_framework"
 require "utils_test"
 require "ryd_tokenizer_test"
+require "lua_seek_test"
 
 --[[
 Expect_Error("check_for_error-pass", function() error("Some error") end)
