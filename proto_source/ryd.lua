@@ -1,18 +1,20 @@
 require "utils"
 require "definitions"
 
-local Ryd = {}
-
 ---@alias Token Text | Command | Group | Separator
 
 ---@class Text
 ---@field _metaname "Token.Text"
----@field start_pos integer Byte offset of the token within the file.
----@field end_pos integer Byte offset of the token within the file.
+---@field start_pos integer Byte offset of the token start within the file.
+---@field end_pos integer Byte offset of the token end within the file.
 local Text = {}
 Text.__index = Text
 Text._metaname = "Token.Text"
 
+---Creates a new plain text block token.
+---@param start_position integer Byte offset of the token start within the file.
+---@param end_position integer Byte offset of the token end within the file.
+---@return Text
 function Text.new (start_position, end_position)
     return setmetatable({
         start_pos = start_position,
@@ -22,14 +24,18 @@ end
 
 ---@class Command
 ---@field _metaname "Token.Command"
----@field start_pos integer Byte offset of the token within the file.
----@field end_pos integer Byte offset of the token within the file.
----@field name string Identifier part of the command
+---@field start_pos integer Byte offset of the token start within the file.
+---@field end_pos integer Byte offset of the token end within the file.
+---@field name string Identifier part of the command.
 ---@field content Token[]
 local Command = {}
 Command.__index = Command
 Command._metaname = "Token.Command"
 
+---Creates a new command token.
+---Remaining fields must be populated after creation.
+---@param position integer Byte offset of the token start within the file.
+---@return Command
 function Command.new (position)
     return setmetatable({
         start_pos = position,
@@ -48,7 +54,9 @@ local Group = {}
 Group.__index = Group
 Group._metaname = "Token.Group"
 
----@param position integer
+---Creates a new group token.
+---Remaining fields must be populated after creation.
+---@param position integer Byte offset of the token start within the file.
 ---@return Group
 function Group.new (position)
     return setmetatable({
@@ -59,13 +67,14 @@ function Group.new (position)
 end
 
 ---@class Separator
----@field _metaname "Token.Separator"
+---@field _metaname "Token.Separator":
 ---@field pos integer Byte offset of the token within the file.
 local Separator = {}
 Separator.__index = Separator
 Separator._metaname = "Token.Separator"
 
----@param position integer
+---Creates a new separator token.
+---@param position integer Byte offset of the token within the file.
 ---@return Separator
 function Separator.new (position)
     return setmetatable({
@@ -76,6 +85,7 @@ end
 
 
 ---@enum Token_Type
+---Mapping of meta names to token types
 local Token_Type = {
     ["Token.Command"]   = Command,
     ["Token.Group"]     = Group,
@@ -85,9 +95,10 @@ local Token_Type = {
 
 
 
----@param source string
----@return Token[]
-function Ryd.tokenize (source)
+---Converts an input string into a list of tokens.
+---@param source string Source text to be tokenized.
+---@return Token[] tokens Resulting list of tokens.
+local function tokenize (source)
     local result = {}
 
     ---@type Token[]
@@ -104,7 +115,7 @@ function Ryd.tokenize (source)
         elseif top._metaname == "Token.Group" then
             return top.content
         end
-        error("idk")
+        error("Cannot get context for type `".. top._metaname .."`")
     end
 
     local last = 0
@@ -210,4 +221,23 @@ function Ryd.tokenize (source)
     return result
 end
 
+
+
+--#region API
+
+local Ryd = {}
+
+Ryd.Token_Type = Token_Type
+Ryd.Token = {
+    Text      = Text,
+    Command   = Command,
+    Group     = Group,
+    Separator = Separator,
+}
+
+Ryd.tokenize = tokenize
+
 return Ryd
+
+--#endregion
+

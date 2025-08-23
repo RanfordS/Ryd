@@ -1,11 +1,16 @@
 U = {}
 
+---Weights for each Lua type used in universal_comp.
+---@type {[type]: integer}
 local universal_comp_weight = {
     ["nil"] = 0,
     number = 1,
     boolean = 2,
     string = 3,
     table = 4,
+    ["function"] = 5,
+    thread = 6,
+    userdata = 7,
 }
 
 ---Universal comparison function, intended for use in `table.sort`.
@@ -91,6 +96,7 @@ function string.escape (str)
     return '"'.. new ..'"'
 end
 
+---Lookup of Lua keywords.
 local keywords = {
     ["and"]      = true,
     ["break"]    = true,
@@ -116,6 +122,8 @@ local keywords = {
 }
 
 ---Checks to see if a string could be used as a key without being escaped.
+---@param str string String to check.
+---@return boolean is_valid_key
 function string.valid_key (str)
     if keywords[str] then
         return false
@@ -123,13 +131,18 @@ function string.valid_key (str)
     return str:match("^[_%a][_%a%d]*$") ~= nil
 end
 
+---Indents a single-line string.
+---@param str string String to indent.
+---@param depth integer Number of levels to indent by.
+---@return string
 local function indent (str, depth)
     return ("    "):rep(depth) .. str
 end
 
+---Lookup of Lua types that splat supports as table keys.
 local splat_supported_key_types = {
-    number = true,
-    string = true,
+    number  = true,
+    string  = true,
     boolean = true,
 }
 
