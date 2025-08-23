@@ -1,3 +1,4 @@
+--TODO: The following is a lie now, move or remove.
 --  All test are structured as follows:
 --  1.  Some functionality is invoked and a string is returned.
 --  2.  The resulting string is written to a file in [m|test_output/].
@@ -7,17 +8,27 @@
 --  between output and the baseline.
 --  If the new output file is correct, replace the baseline.
 
+local Test = {}
+
+---Map of test names to their corresponding results.
+---@type {[string]: boolean}
 local test_results = {}
 
 local pass = "\27[1;32mPass\27[0m"
 local fail = "\27[1;31mFail\27[0m"
 
----@param test_name string Unique name for the test.
----@param actual string Resulting output of the tested code.
-function Test_Result (test_name, actual)
+---@param test_name string
+---@param is_pass boolean
+function Test.record_result (test_name, is_pass)
     assert(test_results[test_name] == nil,
         ("Multiple test have the name `%s`"):format(test_name))
+    test_results[test_name] = is_pass
+    print((is_pass and pass or fail) .." - ".. test_name)
+end
 
+---@param test_name string Unique name for the test.
+---@param actual string Resulting output of the tested code.
+function Test.file_compare (test_name, actual)
     local output_path   = ("./test_output/%s")  :format(test_name)
     local baseline_path = ("./test_baseline/%s"):format(test_name)
     local result = false
@@ -37,25 +48,19 @@ function Test_Result (test_name, actual)
     else
         print(test_name ..": Could not open file for reading baseline")
     end
-    test_results[test_name] = result
 
-    print((result and pass or fail) .." - ".. test_name)
+    Test.record_result(test_name, result)
 end
 
 ---@param test_name string Unique name for the test.
 ---@param f fun(...: any): any Function to be tested.
 ---@param ... any Optional arguments to pass to the function.
-function Expect_Error (test_name, f, ...)
-    assert(test_results[test_name] == nil,
-        ("Multiple test have the name `%s`"):format(test_name))
+function Test.expect_error (test_name, f, ...)
     local success, _ = pcall(f, ...)
-    local result = not success
-    test_results[test_name] = result
-
-    print((result and pass or fail) .." - ".. test_name)
+    Test.record_result(test_name, not success)
 end
 
-function Test_Summary ()
+function Test.show_summary ()
     local passed, failed = 0, 0
     ---@type string[]
     local failed_tests = {}
@@ -84,4 +89,6 @@ function Test_Summary ()
     end
 
 end
+
+return Test
 

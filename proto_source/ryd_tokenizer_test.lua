@@ -1,13 +1,12 @@
-require "test_framework"
 local R = require "ryd"
 
-Test_Result("ryd.tokenizer-empty.lua",
+T.file_compare("ryd.tokenizer-empty.lua",
     "return ".. table.splat(R.tokenize("")))
 
-Test_Result("ryd.tokenizer-just_text.lua",
+T.file_compare("ryd.tokenizer-just_text.lua",
     "return ".. table.splat(R.tokenize("Foo")))
 
-Test_Result("ryd.tokenizer-one_command.lua",
+T.file_compare("ryd.tokenizer-one_command.lua",
     "return ".. table.splat(R.tokenize("Foo [alpha]")))
 
 local complete_input = [=[
@@ -37,7 +36,7 @@ The following commands can be used to include the special characters literally.
 ]=]
 local tokenized = R.tokenize(complete_input)
 local complete_result = table.splat(tokenized)
-Test_Result("ryd.tokenizer-large_complete_sample.lua",
+T.file_compare("ryd.tokenizer-large_complete_sample.lua",
     "return ".. complete_result)
 
 
@@ -56,7 +55,7 @@ local failure_cases = {
 }
 
 for test, input in table.sorted_pairs(failure_cases) do
-    Expect_Error("ryd.tokenizer-fail-".. test,
+    T.expect_error("ryd.tokenizer-fail-".. test,
         R.tokenize, input)
 end
 
