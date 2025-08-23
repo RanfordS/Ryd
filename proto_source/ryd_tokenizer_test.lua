@@ -34,10 +34,37 @@ The following commands can be used to include the special characters literally.
 | [}]       | [m|[l][}][r]] | Right curly brace. |[nr]
 ]
 ]=]
-local tokenized = R.tokenize(complete_input)
-local complete_result = table.splat(tokenized)
+local complete_tokenized = R.tokenize(complete_input)
+local complete_result = table.splat(complete_tokenized)
 T.file_compare("ryd.tokenizer-large_complete_sample.lua",
     "return ".. complete_result)
+
+local seeking_input = [=[
+[section|Seeking Example]
+
+[set|fib|10]
+
+First [show|fib] Fibonacci numbers:
+[enum|
+    [lua|
+        local fib = {0, 1}
+        while #fib < Ryd.vars.fib do
+            local i = #fib + 1
+            fib[i] = fib[i-2] + fib[i-1]
+        end
+
+        for _, v in ipairs(fib) do
+            Ryd.insert("| ".. tostring(v))
+        end
+    ]
+]
+
+How's that?
+]=]
+local seeking_tokenized = R.tokenize(seeking_input)
+local seeking_result = table.splat(seeking_tokenized)
+T.file_compare("ryd.tokenizer-seeking_command.lua",
+    "return ".. seeking_result)
 
 
 

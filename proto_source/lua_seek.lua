@@ -1,14 +1,8 @@
 
-local block_pattern = "%[=*%["
-local function block_open_to_shut_pattern (block)
-end
-
 ---Seeks the end of a Lua block.
----@TODO: handle [[]] strings
----@TODO: handle comments
 ---@param str string String to search within.
 ---@param start_pos integer Byte to start from, the first character of Lua.
----@return integer? end_pos Resulting length of the Lua block, nil on error.
+---@return integer end_pos Resulting length of the Lua block.
 return function (str, start_pos)
     local end_pos = #str
     local bracket_depth = 0
