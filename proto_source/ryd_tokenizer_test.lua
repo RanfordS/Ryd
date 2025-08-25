@@ -71,7 +71,8 @@ T.file_compare("ryd.tokenizer-seeking_command.lua",
 ---@type {[string]: string}
 local failure_cases = {
     incomplete_command = "[",
-    incomplete_command_args = "[foo|bar",
+    incomplete_command_args_1 = "[foo|bar",
+    incomplete_command_args_2 = "[foo|bar|",
     incomplete_group = "{",
     unmatched_command = "]",
     unmatched_group = "}",
